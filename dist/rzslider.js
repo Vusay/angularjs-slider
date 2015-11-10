@@ -255,6 +255,13 @@ function throttle(func, wait, options) {
     this.initHasRun = false;
 
     /**
+     * Set to true if slider is in vertical mode
+     *
+     * @type {boolean}
+     */
+    this.vertical = !!attributes.rzSliderVertical;
+
+    /**
      * Custom translate function
      *
      * @type {function}
@@ -418,6 +425,8 @@ function throttle(func, wait, options) {
         angular.element($window).off('resize', calcDimFn);
         self.deRegFuncs.map(function(unbind) { unbind(); });
       });
+
+      if(this.vertical) this.sliderElem.addClass("vertical");
     },
 
     /**
@@ -656,15 +665,25 @@ function throttle(func, wait, options) {
      */
     calcViewDimensions: function ()
     {
-      var handleWidth = this.getWidth(this.minH);
+      var handleWidth = this.getWidth(this.minH),
+          handleHeight = this.getHeight(this.minH);
 
       this.handleHalfWidth = handleWidth / 2;
+      this.handleHalfHeight = handleHeight / 2;
       this.barWidth = this.getWidth(this.fullBar);
+      this.barHeight = this.getHeight(this.fullBar);
 
-      this.maxLeft = this.barWidth - handleWidth;
+      this.maxLeft = (this.vertical) ? this.barHeight - handleHeight : this.barWidth - handleWidth;
 
       this.getWidth(this.sliderElem);
-      this.sliderElem.rzsl = this.sliderElem[0].getBoundingClientRect().left;
+      
+      if (this.vertical) {
+        this.getHeight(this.sliderElem);
+        this.sliderElem.rzsl = this.sliderElem[0].getBoundingClientRect().top;
+      } else {
+        this.getWidth(this.sliderElem);
+        this.sliderElem.rzsl = this.sliderElem[0].getBoundingClientRect().left;
+      }
 
       if(this.initHasRun)
       {
@@ -713,8 +732,14 @@ function throttle(func, wait, options) {
     updateCeilLab: function()
     {
       this.translateFn(this.scope.rzSliderCeil, this.ceilLab);
-      this.setLeft(this.ceilLab, this.barWidth - this.ceilLab.rzsw);
-      this.getWidth(this.ceilLab);
+      
+      if(this.vertical) {
+        this.setBottom(this.ceilLab, this.barHeight - this.ceilLab.rzsw);
+        this.getHeight(this.ceilLab);
+      } else {
+        this.setLeft(this.ceilLab, this.barWidth - this.ceilLab.rzsw);
+        this.getWidth(this.ceilLab);
+      }
     },
 
     /**
@@ -725,7 +750,9 @@ function throttle(func, wait, options) {
     updateFloorLab: function()
     {
       this.translateFn(this.scope.rzSliderFloor, this.flrLab);
-      this.getWidth(this.flrLab);
+
+      if(this.vertical) this.getHeight(this.flrLab);
+      else this.getWidth(this.flrLab);
     },
 
     /**
@@ -820,9 +847,19 @@ function throttle(func, wait, options) {
      */
     updateLowHandle: function(newOffset)
     {
-      this.setLeft(this.minH, newOffset);
-      this.translateFn(this.scope.rzSliderModel, this.minLab);
-      this.setLeft(this.minLab, newOffset - this.minLab.rzsw / 2 + this.handleHalfWidth);
+      var delta = Math.abs(this.minH.rzsl - newOffset);
+
+      if(this.minLab.rzsv && delta < 1) { return; }
+
+      if(this.vertical){
+        this.setBottom(this.minH, newOffset);
+        this.translateFn(this.scope.rzSliderModel, this.minLab);
+        this.setBottom(this.minLab, newOffset - this.minLab.rzsw / 2 + this.handleHalfHeight);
+      } else {
+        this.setLeft(this.minH, newOffset);
+        this.translateFn(this.scope.rzSliderModel, this.minLab);
+        this.setLeft(this.minLab, newOffset - this.minLab.rzsw / 2 + this.handleHalfWidth);
+      }
 
       this.shFloorCeil();
     },
@@ -835,9 +872,15 @@ function throttle(func, wait, options) {
      */
     updateHighHandle: function(newOffset)
     {
-      this.setLeft(this.maxH, newOffset);
-      this.translateFn(this.scope.rzSliderHigh, this.maxLab);
-      this.setLeft(this.maxLab, newOffset - this.maxLab.rzsw / 2 + this.handleHalfWidth);
+      if(this.vertical){
+        this.setBottom(this.maxH, newOffset);
+        this.translateFn(this.scope.rzSliderHigh, this.maxLab);
+        this.setBottom(this.maxLab, newOffset - this.maxLab.rzsw / 2 + this.handleHalfHeight);
+      } else {
+        this.setLeft(this.maxH, newOffset);
+        this.translateFn(this.scope.rzSliderHigh, this.maxLab);
+        this.setLeft(this.maxLab, newOffset - this.maxLab.rzsw / 2 + this.handleHalfWidth);
+      }
 
       this.shFloorCeil();
     },
@@ -903,8 +946,13 @@ function throttle(func, wait, options) {
      */
     updateSelectionBar: function()
     {
-      this.setWidth(this.selBar, Math.abs(this.maxH.rzsl - this.minH.rzsl) + this.handleHalfWidth);
-      this.setLeft(this.selBar, this.range ? this.minH.rzsl + this.handleHalfWidth : 0);
+      if(this.vertical) {
+        this.setHeight(this.selBar, Math.abs(this.maxH.rzsl - this.minH.rzsl) + this.handleHalfHeight);
+        this.setBottom(this.selBar, this.range ? this.minH.rzsl + this.handleHalfHeight : 0);
+      } else {
+        this.setWidth(this.selBar, Math.abs(this.maxH.rzsl - this.minH.rzsl) + this.handleHalfWidth);
+        this.setLeft(this.selBar, this.range ? this.minH.rzsl + this.handleHalfWidth : 0);
+      }
     },
 
     /**
@@ -998,6 +1046,13 @@ function throttle(func, wait, options) {
       return left;
     },
 
+    setBottom: function (elem, bottom)
+    {
+      elem.rzsl = bottom;
+      elem.css({bottom: bottom + 'px'});
+      return bottom;
+    },
+
     /**
      * Get element width
      *
@@ -1008,6 +1063,13 @@ function throttle(func, wait, options) {
     {
       var val = elem[0].getBoundingClientRect();
       elem.rzsw = val.right - val.left;
+      return elem.rzsw;
+    },
+
+    getHeight: function(elem)
+    {
+      var val = elem[0].getBoundingClientRect();
+      elem.rzsw = val.bottom - val.top;
       return elem.rzsw;
     },
 
@@ -1023,6 +1085,13 @@ function throttle(func, wait, options) {
       elem.rzsw = width;
       elem.css({width: width + 'px'});
       return width;
+    },
+
+    setHeight: function(elem, height)
+    {
+      elem.rzsw = height;
+      elem.css({height: height + 'px'});
+      return height;
     },
 
     /**
@@ -1069,6 +1138,20 @@ function throttle(func, wait, options) {
           : event.originalEvent.touches[0].clientX;
     },
 
+    getEventY: function(event)
+    {
+      /* http://stackoverflow.com/a/12336075/282882 */
+      //noinspection JSLint
+      if('clientY' in event)
+      {
+        return event.clientY;
+      }
+
+      return event.originalEvent === undefined ?
+          event.touches[0].clientY
+          : event.originalEvent.touches[0].clientY;
+    },
+
     /**
      * Get the handle closest to an event.
      *
@@ -1078,7 +1161,7 @@ function throttle(func, wait, options) {
     getNearestHandle: function(event)
     {
       if (!this.range) { return this.minH; }
-      var offset = this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
+      var offset = (this.vertical) ? this.getEventY(event) - this.sliderElem.rzsl - this.handleHalfHeight : this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
       return Math.abs(offset - this.minH.rzsl) < Math.abs(offset - this.maxH.rzsl) ? this.minH : this.maxH;
     },
 
@@ -1190,10 +1273,12 @@ function throttle(func, wait, options) {
     onMove: function (pointer, event)
     {
       var eventX = this.getEventX(event),
+          eventY = this.getEventY(event),
           sliderLO, newOffset, newValue;
 
       sliderLO = this.sliderElem.rzsl;
-      newOffset = eventX - sliderLO - this.handleHalfWidth;
+      
+      newOffset = (this.vertical) ? this.maxLeft - (eventY - sliderLO - this.handleHalfHeight) : eventX - sliderLO - this.handleHalfWidth;
 
       if(newOffset <= 0)
       {
@@ -1229,7 +1314,8 @@ function throttle(func, wait, options) {
      */
     onDragStart: function(pointer, ref, event)
     {
-      var offset = this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
+      var offset = (this.vertical) ? this.getEventY(event) - this.sliderElem.rzsl - this.handleHalfHeight : this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
+
       this.dragging = {
         active: true,
         value: this.offsetToValue(offset),
@@ -1255,8 +1341,9 @@ function throttle(func, wait, options) {
      */
     onDragMove: function(pointer, event)
     {
-      var newOffset = this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth,
-          newMinOffset, newMaxOffset,
+      var newOffset = (this.vertical) ? this.getEventY(event) - this.sliderElem.rzsl - this.handleHalfHeight : this.getEventX(event) - this.sliderElem.rzsl - this.handleHalfWidth;
+
+      var newMinOffset, newMaxOffset,
           newMinValue, newMaxValue;
 
       if (newOffset <= this.dragging.lowDist)
@@ -1426,6 +1513,7 @@ function throttle(func, wait, options) {
       rzSliderShowTicksValue: '=?',
       rzSliderDisabled: '=?',
       rzSliderInterval: '=?',
+      rzSliderVertical: '=?'
     },
 
     /**
