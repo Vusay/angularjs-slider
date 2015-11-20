@@ -1515,6 +1515,7 @@ function throttle(func, wait, options) {
       rzSliderInterval: '=?',
       rzSliderVertical: '=?'
     },
+    transclude: true,
 
     /**
      * Return template URL
