@@ -64,6 +64,20 @@ rzslider {
       background: @barFillColor;
       .rounded(@barHeight/2);
     }
+
+    &.rz-offset-left {
+      height: @barHeight;
+      background: #232323;
+      position : relative;
+      width : @handlePointerSize;
+    }
+    &.rz-offset-right {
+      height: @barHeight;
+      background: #232323;
+      position: relative;
+      float: right;
+      width : @handlePointerSize;
+    }
   }
 
   .rz-pointer {
