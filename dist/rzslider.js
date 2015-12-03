@@ -564,14 +564,14 @@ function throttle(func, wait, options) {
         {
           case 0: this.fullBar = jElem; break;
           case 1: this.selBar = jElem; break;
-          case 2: this.minH = jElem; break;
-          case 3: this.maxH = jElem; break;
-          case 4: this.flrLab = jElem; break;
-          case 5: this.ceilLab = jElem; break;
-          case 6: this.minLab = jElem; break;
-          case 7: this.maxLab = jElem; break;
-          case 8: this.cmbLab = jElem; break;
-          case 9: this.ticks = jElem; break;
+          case 3: this.minH = jElem; break;
+          case 4: this.maxH = jElem; break;
+          case 5: this.flrLab = jElem; break;
+          case 6: this.ceilLab = jElem; break;
+          case 7: this.minLab = jElem; break;
+          case 8: this.maxLab = jElem; break;
+          case 9: this.cmbLab = jElem; break;
+          case 10: this.ticks = jElem; break;
         }
 
       }, this);
@@ -1484,7 +1484,7 @@ function throttle(func, wait, options) {
   'use strict';
 
   $templateCache.put('rzSliderTpl.html',
-    "<span class=rz-bar-wrapper><span class=rz-bar></span></span> <span class=rz-bar-wrapper><span class=\"rz-bar rz-selection\"></span></span> <span class=rz-pointer></span> <span class=rz-pointer></span> <span class=\"rz-bubble rz-limit\"></span> <span class=\"rz-bubble rz-limit\"></span> <span class=rz-bubble></span> <span class=rz-bubble></span> <span class=rz-bubble></span><ul class=rz-ticks></ul>"
+    "<span class=rz-bar-wrapper><span class=rz-bar></span></span> <span class=rz-bar-wrapper><span class=\"rz-bar rz-selection\"></span></span> <span class=rz-bar-wrapper><span class=\"rz-bar rz-offset-left\"><span class=\"rz-bar rz-offset-right\"></span></span> <span class=rz-pointer></span> <span class=rz-pointer></span> <span class=\"rz-bubble rz-limit\"></span> <span class=\"rz-bubble rz-limit\"></span> <span class=rz-bubble></span> <span class=rz-bubble></span> <span class=rz-bubble></span><ul class=rz-ticks></ul></span>"
   );
 
 }]);
