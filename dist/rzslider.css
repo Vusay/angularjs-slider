@@ -74,21 +74,6 @@ rzslider .rz-bar.rz-selection {
           border-radius: 2px;
 }
 
-rzslider .rz-offset-left {
-  position: relative;
-  width: 8px !important;
-  height: 4px;
-  background: #232323;
-}
-
-rzslider .rz-offset-right {
-  position: relative;
-  float: right;
-  width: 8px !important;
-  height: 4px;
-  background: #232323;
-}
-
 rzslider .rz-pointer {
   top: -14px;
   z-index: 3;
